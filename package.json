@@ -1,0 +1,33 @@
+{
+  "name": "slackbot-pending-reviews",
+  "version": "1.0.0-alpha.1",
+  "description": "",
+  "author": "Romain GUILLOTEAU (https://www.romainguilloteau.dev/)",
+  "license": "ISC",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rubyistdotjs/slackbot-pending-reviews"
+  },
+  "scripts": {
+    "test": "NODE_ENV=test mocha --recursive --exit --require test/setup.js"
+  },
+  "devDependencies": {
+    "@slack/webhook": "^5.0.3",
+    "chai": "^4.2.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.1",
+    "eslint-plugin-prettier": "^3.1.2",
+    "jest": "^25.2.7",
+    "mocha": "^7.1.1",
+    "nodemon": "^2.0.2",
+    "prettier": "^2.0.2",
+    "sinon": "^9.0.1",
+    "sinon-chai": "^3.5.0"
+  },
+  "dependencies": {
+    "async": "^3.2.0",
+    "axios": "^0.19.2",
+    "dotenv": "^8.2.0"
+  }
+}
