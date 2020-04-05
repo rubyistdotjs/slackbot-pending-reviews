@@ -26,7 +26,7 @@ describe('constants', function () {
   describe('GITHUB_REPOSITORIES', function () {
     it('returns an array of github repositories', function () {
       expect(GITHUB_REPOSITORIES).eql([
-        'stark/winterfall',
+        'stark/winterfell',
         'lannister/casterly-rock',
       ]);
     });

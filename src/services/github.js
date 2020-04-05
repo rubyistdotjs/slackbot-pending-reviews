@@ -2,7 +2,7 @@ const axios = require('axios');
 
 const { GITHUB_API_URL, GITHUB_API_ACCESS_TOKEN } = process.env;
 
-const githubApi = axios.create({
+const api = axios.create({
   baseURL: GITHUB_API_URL,
   headers: {
     Authorization: `Bearer ${GITHUB_API_ACCESS_TOKEN}`,
@@ -10,7 +10,7 @@ const githubApi = axios.create({
 });
 
 function getOpenedPullRequests(repository) {
-  return githubApi.get(`repos/${repository}/pulls`, {
+  return api.get(`repos/${repository}/pulls`, {
     params: {
       state: 'open',
       sort: 'created',
@@ -20,6 +20,6 @@ function getOpenedPullRequests(repository) {
 }
 
 module.exports = {
-  githubApi,
+  api,
   getOpenedPullRequests,
 };

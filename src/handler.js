@@ -1,8 +1,7 @@
-require('dotenv').config();
 const mapSeries = require('async/mapSeries');
 
-const { getOpenedPullRequests } = require('./services/github');
-const { notifyReviewRequested } = require('./services/slack');
+const githubApi = require('./services/github');
+const slack = require('./services/slack');
 const {
   DEVELOPER_GITHUB_USERNAMES,
   GITHUB_REPOSITORIES,
@@ -17,7 +16,7 @@ function pullHasDeveloperReviewRequests(pull) {
 }
 
 async function getRepositoryPullRequests(repository) {
-  const res = await getOpenedPullRequests(repository);
+  const res = await githubApi.getOpenedPullRequests(repository);
   return res.data.filter(pullHasDeveloperReviewRequests);
 }
 
@@ -28,7 +27,7 @@ async function getRepositoriesPullRequests() {
 
 module.exports.notifyPendingReviews = async () => {
   const pullRequests = await getRepositoriesPullRequests();
-  await notifyReviewRequested(pullRequests);
+  await slack.notifyReviewRequested(pullRequests);
 
   return null;
 };
