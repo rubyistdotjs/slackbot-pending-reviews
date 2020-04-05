@@ -7,6 +7,7 @@ provider:
   runtime: nodejs12.x
   stage: prod
   region: eu-west-1
+  memorySize: 512
 
 package:
   include:
@@ -19,4 +20,4 @@ functions:
       - schedule:
           name: notify-pending-reviews
           description: 'Send a Slack message listing all GitHub pending reviews.'
-          rate: cron(${env:AWS_LAMBDA_SCHEDULE} )
+          rate: ${env:AWS_LAMBDA_SCHEDULE}
