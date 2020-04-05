@@ -1,0 +1,22 @@
+service: slackbot-pending-reviews
+plugins:
+  - serverless-dotenv-plugin
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: prod
+  region: eu-west-1
+
+package:
+  include:
+    - src/handler.js
+
+functions:
+  notify-pending-reviews:
+    handler: handler.notifyPendingReviews
+    events:
+      - schedule:
+          name: notify-pending-reviews
+          description: 'Send a Slack message listing all GitHub pending reviews.'
+          rate: cron(${env:AWS_LAMBDA_SCHEDULE} )

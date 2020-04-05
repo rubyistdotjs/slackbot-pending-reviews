@@ -22,6 +22,8 @@
     "mocha": "^7.1.1",
     "nodemon": "^2.0.2",
     "prettier": "^2.0.2",
+    "serverless": "^1.67.0",
+    "serverless-dotenv-plugin": "^2.3.2",
     "sinon": "^9.0.1",
     "sinon-chai": "^3.5.0"
   },

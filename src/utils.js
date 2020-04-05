@@ -1,18 +1,26 @@
 function stringToArray(string, delimiter = ',') {
-  if (string == null || string.constructor !== String) return [];
-
   return string
     .split(delimiter)
     .map((s) => s.trim())
     .filter((s) => s !== '');
 }
 
-function splitUsernames(string) {
-  const [github, slack] = stringToArray(string, '#');
-  return { github, slack };
+function stringToUsernames(string) {
+  const usernames = stringToArray(string, '#');
+
+  if (usernames.length !== 2) {
+    throw new TypeError('Expected a string with format "github#slack"');
+  }
+
+  return { github: usernames[0], slack: usernames[1] };
+}
+
+function pluckGithubUsername({ github }) {
+  return github;
 }
 
 module.exports = {
   stringToArray,
-  splitUsernames,
+  stringToUsernames,
+  pluckGithubUsername,
 };

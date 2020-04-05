@@ -1,17 +1,13 @@
 const { IncomingWebhook } = require('@slack/webhook');
-const { SLACK_WEBHOOK_URL, SLACK_CHANNEL } = process.env;
-const { DEVELOPER_USERNAMES } = require('../constants');
 
-function findSlackUsername(githubUsername) {
-  const dev = DEVELOPER_USERNAMES.find((u) => u.github === githubUsername);
-  return dev ? dev.slack : null;
-}
+const { SLACK_WEBHOOK_URL, SLACK_CHANNEL } = process.env;
+const { findSlackUsernameByGithubUsername } = require('../helpers');
 
 const incomingWebhook = new IncomingWebhook(SLACK_WEBHOOK_URL);
 
 function notifyReviewRequestedPullRequest(pullRequest) {
   const reviewers = pullRequest.requested_reviewers
-    .map((pull) => findSlackUsername(pull.login))
+    .map((pull) => findSlackUsernameByGithubUsername(pull.login))
     .filter((u) => u !== null)
     .map((username) => `<@${username}>`)
     .join(', ');

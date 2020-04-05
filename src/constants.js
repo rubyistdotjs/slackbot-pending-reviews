@@ -1,9 +1,13 @@
-const { stringToArray, splitUsernames } = require('./utils');
 const { DEVELOPER_USERNAMES, GITHUB_REPOSITORIES } = process.env;
+const {
+  stringToArray,
+  stringToUsernames,
+  pluckGithubUsername,
+} = require('./utils');
 
 const developers = stringToArray(DEVELOPER_USERNAMES);
-const developerUsernames = developers.map(splitUsernames);
-const developerGithubUsernames = developerUsernames.map((u) => u.github);
+const developerUsernames = developers.map(stringToUsernames);
+const developerGithubUsernames = developerUsernames.map(pluckGithubUsername);
 
 module.exports = {
   GITHUB_REPOSITORIES: stringToArray(GITHUB_REPOSITORIES),

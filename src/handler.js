@@ -26,4 +26,12 @@ async function getRepositoriesPullRequests() {
   return pulls.flat();
 }
 
-getRepositoriesPullRequests().then(notifyReviewRequested);
+module.exports.notifyPendingReviews = async () => {
+  const pullRequests = await getRepositoriesPullRequests();
+  await notifyReviewRequested(pullRequests);
+
+  return {
+    statusCode: 200,
+    body: null,
+  };
+};
