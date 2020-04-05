@@ -1,12 +1,12 @@
 require('dotenv').config();
 const mapSeries = require('async/mapSeries');
 
-const { getOpenedPullRequests } = require('./src/services/github');
-const { notifyReviewRequested } = require('./src/services/slack');
+const { getOpenedPullRequests } = require('./services/github');
+const { notifyReviewRequested } = require('./services/slack');
 const {
   DEVELOPER_GITHUB_USERNAMES,
   GITHUB_REPOSITORIES,
-} = require('./src/constants');
+} = require('./constants');
 
 function reviewerIsDeveloper(reviewer) {
   return DEVELOPER_GITHUB_USERNAMES.includes(reviewer.login);
@@ -30,8 +30,5 @@ module.exports.notifyPendingReviews = async () => {
   const pullRequests = await getRepositoriesPullRequests();
   await notifyReviewRequested(pullRequests);
 
-  return {
-    statusCode: 200,
-    body: null,
-  };
+  return null;
 };

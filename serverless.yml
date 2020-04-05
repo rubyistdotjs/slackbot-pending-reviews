@@ -14,7 +14,7 @@ package:
 
 functions:
   notify-pending-reviews:
-    handler: handler.notifyPendingReviews
+    handler: src/handler.notifyPendingReviews
     events:
       - schedule:
           name: notify-pending-reviews
