@@ -9,12 +9,14 @@ const api = axios.create({
   },
 });
 
-function getOpenedPullRequests(repository) {
+function getOpenedPullRequests({ repository, page }) {
   return api.get(`repos/${repository}/pulls`, {
     params: {
       state: 'open',
       sort: 'created',
       direction: 'desc',
+      page,
+      per_page: 100,
     },
   });
 }

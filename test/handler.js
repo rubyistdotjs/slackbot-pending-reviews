@@ -19,8 +19,9 @@ describe('handlers', function () {
         'getOpenedPullRequests',
       );
 
-      getOpenedPullRequestsStub.onFirstCall().resolves(casterlyRockRes);
-      getOpenedPullRequestsStub.onSecondCall().resolves(winterfellRes);
+      getOpenedPullRequestsStub.onFirstCall().resolves(winterfellRes[0]);
+      getOpenedPullRequestsStub.onSecondCall().resolves(casterlyRockRes[0]);
+      getOpenedPullRequestsStub.onThirdCall().resolves(casterlyRockRes[1]);
 
       notifyReviewRequestedStub = sinon.stub(slack, 'notifyReviewRequested');
       notifyReviewRequestedStub.resolves(null);
@@ -34,28 +35,42 @@ describe('handlers', function () {
       sinon.restore();
     });
 
-    it('calls githubApi.getOpenedPullRequests twice', async function () {
+    it('calls githubApi.getOpenedPullRequests thrice', async function () {
       await notifyPendingReviews();
-      expect(getOpenedPullRequestsStub).to.have.been.calledTwice;
+      expect(getOpenedPullRequestsStub).to.have.been.calledThrice;
     });
 
     it('calls githubApi.getOpenedPullRequests once for the repository stark/winterfell', async function () {
       await notifyPendingReviews();
-      expect(getOpenedPullRequestsStub).to.have.been.calledWith(
-        'stark/winterfell',
-      );
+      expect(getOpenedPullRequestsStub).to.have.been.calledWith({
+        repository: 'stark/winterfell',
+        page: 0,
+      });
     });
 
-    it('calls githubApi.getOpenedPullRequests once for the repository lannister/casterly-rock', async function () {
+    it('calls githubApi.getOpenedPullRequests twice for the repository lannister/casterly-rock', async function () {
       await notifyPendingReviews();
-      expect(getOpenedPullRequestsStub).to.have.been.calledWith(
-        'lannister/casterly-rock',
-      );
+
+      expect(getOpenedPullRequestsStub).to.have.been.calledWith({
+        repository: 'lannister/casterly-rock',
+        page: 0,
+      });
+
+      expect(getOpenedPullRequestsStub).to.have.been.calledWith({
+        repository: 'lannister/casterly-rock',
+        page: 1,
+      });
     });
 
     it('calls slack.notifyReviewRequested once with the formatted pull requests', async function () {
       await notifyPendingReviews();
       expect(notifyReviewRequestedStub).to.have.been.calledOnceWith([
+        {
+          head: { repo: { name: 'stark' } },
+          requested_reviewers: [{ login: 'jon' }],
+          title: 'Pull Request Winterfell 1',
+          user: { login: 'arya' },
+        },
         {
           head: { repo: { name: 'lannister' } },
           requested_reviewers: [{ login: 'sansa' }, { login: 'jon' }],
@@ -69,10 +84,14 @@ describe('handlers', function () {
           user: { login: 'jon' },
         },
         {
-          head: { repo: { name: 'stark' } },
-          requested_reviewers: [{ login: 'jon' }],
-          title: 'Pull Request Winterfell 1',
-          user: { login: 'arya' },
+          head: { repo: { name: 'lannister' } },
+          requested_reviewers: [
+            { login: 'rubyistdotjs' },
+            { login: 'arya' },
+            { login: 'sansa' },
+          ],
+          title: 'Pull Request CasterlyRock 6',
+          user: { login: 'jon' },
         },
       ]);
     });

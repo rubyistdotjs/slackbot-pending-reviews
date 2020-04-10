@@ -15,9 +15,20 @@ function pullHasDeveloperReviewRequests(pull) {
   return pull.requested_reviewers.some(reviewerIsDeveloper);
 }
 
-async function getRepositoryPullRequests(repository) {
-  const res = await githubApi.getOpenedPullRequests(repository);
-  return res.data.filter(pullHasDeveloperReviewRequests);
+function hasMore(res) {
+  return res.headers.link && res.headers.link.includes('rel="next"');
+}
+
+async function getRepositoryPullRequests(repository, page = 1) {
+  const res = await githubApi.getOpenedPullRequests({ repository, page });
+  const pullRequests = res.data.filter(pullHasDeveloperReviewRequests);
+
+  if (hasMore(res)) {
+    const nextPrs = await getRepositoryPullRequests(repository, page + 1);
+    return [...pullRequests, ...nextPrs];
+  } else {
+    return pullRequests;
+  }
 }
 
 async function getRepositoriesPullRequests() {
