@@ -1,41 +1,50 @@
 const { IncomingWebhook } = require('@slack/webhook');
 
-const { SLACK_WEBHOOK_URL, SLACK_CHANNEL } = process.env;
-const { findSlackUsernameByGithubUsername } = require('../helpers');
-
+const { SLACK_WEBHOOK_URL } = process.env;
 const incomingWebhook = new IncomingWebhook(SLACK_WEBHOOK_URL);
 
-function notifyReviewRequestedPullRequest(pullRequest) {
-  const reviewers = pullRequest.requested_reviewers
-    .map((pull) => findSlackUsernameByGithubUsername(pull.login))
-    .filter((u) => u !== null)
-    .map((username) => `<@${username}>`)
+function pendingReviewRequestedToMembers(members, pullRequest) {
+  const { html_url, title, user, requested_reviewers } = pullRequest;
+  const repository = pullRequest.head.repo.name;
+
+  const githubReviewers = requested_reviewers.map((reviewer) => reviewer.login);
+  const slackReviewers = members
+    .filter((member) => githubReviewers.includes(member.githubUsername))
+    .map((member) => `<@${member.slackId}>`)
     .join(', ');
 
   return {
     type: 'section',
     text: {
       type: 'mrkdwn',
-      text: `*<${pullRequest.html_url}|${pullRequest.title}>*\nBy *${pullRequest.user.login}* on the repository *${pullRequest.head.repo.name}*\nPending reviewers: ${reviewers}`,
+      text: `*<${html_url}|${title}>*\nBy *${user.login}* on the repository *${repository}*\nPending reviewers: ${slackReviewers}`,
     },
   };
 }
 
-function notifyReviewRequested(pullRequests) {
-  const now = Math.round(Date.now() / 1000);
+function notifyPendingReviewRequestedToTeam({
+  name,
+  slackChannel,
+  members,
+  pullRequests,
+  now = Math.round(Date.now() / 1000),
+}) {
+  const pendingReviews = pullRequests.map((pullRequest) =>
+    pendingReviewRequestedToMembers(members, pullRequest),
+  );
 
   return incomingWebhook.send({
-    channel: SLACK_CHANNEL,
+    channel: slackChannel,
     blocks: [
       {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: `:wave: Good morning everyone.\n\n<!date^${now}^Today {date}|Today>, there is ${pullRequests.length} pull requests awaiting your wisdom.`,
+          text: `:wave: Good morning ${name}.\n\n<!date^${now}^Today {date}|Today>, there is ${pullRequests.length} pull requests awaiting your wisdom.`,
         },
       },
       { type: 'divider' },
-      ...pullRequests.map(notifyReviewRequestedPullRequest),
+      ...pendingReviews,
       {
         type: 'divider',
       },
@@ -59,5 +68,5 @@ function notifyReviewRequested(pullRequests) {
 
 module.exports = {
   incomingWebhook,
-  notifyReviewRequested,
+  notifyPendingReviewRequestedToTeam,
 };

@@ -1,44 +1,75 @@
 const mapSeries = require('async/mapSeries');
 
+const config = require('./config');
 const githubApi = require('./services/github');
 const slack = require('./services/slack');
-const {
-  DEVELOPER_GITHUB_USERNAMES,
-  GITHUB_REPOSITORIES,
-} = require('./constants');
 
 function reviewerIsDeveloper(reviewer) {
-  return DEVELOPER_GITHUB_USERNAMES.includes(reviewer.login);
+  return config.developerGithubUsernames.includes(reviewer.login);
 }
 
-function pullHasDeveloperReviewRequests(pull) {
+function hasDeveloperReviewRequests(pull) {
   return pull.requested_reviewers.some(reviewerIsDeveloper);
 }
 
-function hasMore(res) {
-  return res.headers.link && res.headers.link.includes('rel="next"');
+async function fetchRepositoryPullRequests(repository) {
+  const pullRequests = await githubApi.traversePagination({
+    endpoint: githubApi.getOpenedPullRequests,
+    params: {
+      repository,
+    },
+  });
+
+  return pullRequests.filter(hasDeveloperReviewRequests);
 }
 
-async function getRepositoryPullRequests(repository, page = 1) {
-  const res = await githubApi.getOpenedPullRequests({ repository, page });
-  const pullRequests = res.data.filter(pullHasDeveloperReviewRequests);
+async function fetchOrganizationRepositories() {
+  const repositories = await githubApi.traversePagination({
+    endpoint: githubApi.getOrganizationRepositories,
+    params: {
+      organization: config.organization,
+    },
+  });
 
-  if (hasMore(res)) {
-    const nextPrs = await getRepositoryPullRequests(repository, page + 1);
-    return [...pullRequests, ...nextPrs];
-  } else {
-    return pullRequests;
-  }
+  return repositories.map((repository) => repository.full_name);
 }
 
-async function getRepositoriesPullRequests() {
-  const pulls = await mapSeries(GITHUB_REPOSITORIES, getRepositoryPullRequests);
+async function fetchOrganisationPullRequests() {
+  const repositories = await fetchOrganizationRepositories();
+  const pulls = await mapSeries(repositories, fetchRepositoryPullRequests);
   return pulls.flat();
 }
 
-module.exports.notifyPendingReviews = async () => {
-  const pullRequests = await getRepositoriesPullRequests();
-  await slack.notifyReviewRequested(pullRequests);
+function pushPullRequestInRelevantTeams(teams, pullRequest) {
+  const usernames = pullRequest.requested_reviewers.map((r) => r.login);
 
-  return null;
+  return teams.map((team) => {
+    if (team.members.some((m) => usernames.includes(m.githubUsername))) {
+      return {
+        ...team,
+        pullRequests: [...team.pullRequests, pullRequest],
+      };
+    } else {
+      return team;
+    }
+  });
+}
+
+function attachPullRequestsToTeams(pullRequests) {
+  const initialTeams = config.teams.map((team) => ({
+    ...team,
+    pullRequests: [],
+  }));
+
+  return pullRequests.reduce(pushPullRequestInRelevantTeams, initialTeams);
+}
+
+function notifyTeams(teams) {
+  return mapSeries(teams, slack.notifyPendingReviewRequestedToTeam);
+}
+
+module.exports.notifyPendingReviews = async () => {
+  const pullRequests = await fetchOrganisationPullRequests();
+  const teamWithPullRequests = attachPullRequestsToTeams(pullRequests);
+  return notifyTeams(teamWithPullRequests);
 };

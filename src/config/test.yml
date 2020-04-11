@@ -1,0 +1,43 @@
+organization: Westeros
+teams:
+  - name: 'stark'
+    slackChannel: '#house-stark'
+    members:
+      - githubUsername: Eddard
+        slackId: U000
+      - githubUsername: Catelyn
+        slackId: U001
+      - githubUsername: Robb
+        slackId: U002
+      - githubUsername: Sansa
+        slackId: U003
+      - githubUsername: Arya
+        slackId: U004
+      - githubUsername: Brandon
+        slackId: U005
+      - githubUsername: Rickon
+        slackId: U006
+      - githubUsername: Jon
+        slackId: U007
+  - name: 'lannister'
+    slackChannel: '#house-lannister'
+    members:
+      - githubUsername: Tywin
+        slackId: U010
+      - githubUsername: Jaime
+        slackId: U011
+      - githubUsername: Tyrion
+        slackId: U012
+      - githubUsername: Cersei
+        slackId: U013
+  - name: 'tyrell'
+    slackChannel: '#house-tyrell'
+    members:
+      - githubUsername: Mace
+        slackId: U020
+      - githubUsername: Olenna
+        slackId: U021
+      - githubUsername: Loras
+        slackId: U022
+      - githubUsername: Margaery
+        slackId: U023
