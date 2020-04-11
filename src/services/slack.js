@@ -22,6 +22,49 @@ function pendingReviewRequestedToMembers(members, pullRequest) {
   };
 }
 
+function pendingReviewRequestedToTeamEmptyTemplate({ name, now }) {
+  return [
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `Good morning ${name} :kissing_heart:.\n\n<!date^${now}^Today {date}|Today>, there are ... :scream: OMG no pending review requests, do some people even work in this team ?`,
+      },
+    },
+  ];
+}
+
+function pendingReviewRequestedToTeamTemplate({ name, now, pendingReviews }) {
+  return [
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `Good morning ${name} :kissing_heart:.\n\n<!date^${now}^Today {date}|Today>, there are ${pendingReviews.length} pull requests awaiting your approval.`,
+      },
+    },
+    { type: 'divider' },
+    ...pendingReviews,
+    {
+      type: 'divider',
+    },
+    {
+      type: 'actions',
+      elements: [
+        {
+          type: 'button',
+          text: {
+            type: 'plain_text',
+            emoji: true,
+            text: 'Show all my review requests',
+          },
+          url: 'https://github.com/pulls/review-requested',
+        },
+      ],
+    },
+  ];
+}
+
 function notifyPendingReviewRequestedToTeam({
   name,
   slackChannel,
@@ -35,34 +78,10 @@ function notifyPendingReviewRequestedToTeam({
 
   return incomingWebhook.send({
     channel: slackChannel,
-    blocks: [
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: `:wave: Good morning ${name}.\n\n<!date^${now}^Today {date}|Today>, there is ${pullRequests.length} pull requests awaiting your wisdom.`,
-        },
-      },
-      { type: 'divider' },
-      ...pendingReviews,
-      {
-        type: 'divider',
-      },
-      {
-        type: 'actions',
-        elements: [
-          {
-            type: 'button',
-            text: {
-              type: 'plain_text',
-              emoji: true,
-              text: 'Show all my review requests',
-            },
-            url: 'https://github.com/pulls/review-requested',
-          },
-        ],
-      },
-    ],
+    blocks:
+      pendingReviews.length > 0
+        ? pendingReviewRequestedToTeamTemplate({ name, now, pendingReviews })
+        : pendingReviewRequestedToTeamEmptyTemplate({ name, now }),
   });
 }
 
