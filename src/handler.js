@@ -1,3 +1,4 @@
+const eachSeries = require('async/eachSeries');
 const mapSeries = require('async/mapSeries');
 
 const config = require('./config');
@@ -64,12 +65,13 @@ function attachPullRequestsToTeams(pullRequests) {
   return pullRequests.reduce(pushPullRequestInRelevantTeams, initialTeams);
 }
 
-function notifyTeams(teams) {
-  return mapSeries(teams, slack.notifyPendingReviewRequestedToTeam);
-}
-
 module.exports.notifyPendingReviews = async () => {
   const pullRequests = await fetchOrganisationPullRequests();
   const teamWithPullRequests = attachPullRequestsToTeams(pullRequests);
-  return notifyTeams(teamWithPullRequests);
+
+  await eachSeries(teamWithPullRequests, async function notifyTeam(team) {
+    await slack.notifyPendingReviewRequestedToTeam(team);
+  });
+
+  return null;
 };
