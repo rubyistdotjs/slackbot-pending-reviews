@@ -2,7 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const yaml = require('js-yaml');
 
-const environement = process.env.NODE_ENV || 'development';
+const environement = process.env.STAGE || 'development';
 
 const configFilepath = path.resolve(__dirname, `./${environement}.yml`);
 const configFile = fs.readFileSync(configFilepath, 'utf8');
