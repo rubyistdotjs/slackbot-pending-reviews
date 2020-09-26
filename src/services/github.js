@@ -49,7 +49,6 @@ async function traversePagination({
   page = 0,
   per_page = DEFAULT_PER_PAGE,
 }) {
-  console.log(`${JSON.stringify(params)} ${page}`);
   const res = await endpoint({ ...params, page, per_page });
 
   if (hasNextPage(res)) {
