@@ -1,6 +1,8 @@
 # SlackBot Pending Reviews
 
-A Lambda that retrieve pull requests across multiple repositories through the GitHub API and sends a message on Slack reminding the desired developers that they have pending review requests.
+![](https://github.com/rubyistdotjs/slackbot-pending-reviews/workflows/Lint/badge.svg)
+
+A Lambda that retrieve pull requests of all the repositories of an organization through the GitHub API and sends a message on Slack reminding the desired developers that they have pending review requests.
 
 # Installation
 
@@ -30,6 +32,10 @@ serverless invoke local --function notify-pending-reviews --env production
 
 # Deploy
 
+```bash
+NODE_ENV=production serverless deploy --aws-profile AWS_PROFILE --verbose
 ```
-serverless deploy --stage production --aws-profile AWS_PROFILE --function notify-pending-reviews --verbose
+
+```bash
+NODE_ENV=production serverless deploy --aws-profile AWS_PROFILE --function notify-pending-reviews --verbose
 ```
