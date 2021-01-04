@@ -70,7 +70,11 @@ module.exports.notifyPendingReviews = async () => {
   const teamWithPullRequests = attachPullRequestsToTeams(pullRequests);
 
   await eachSeries(teamWithPullRequests, async function notifyTeam(team) {
-    await slack.notifyPendingReviewRequestedToTeam(team);
+    try {
+      await slack.notifyPendingReviewRequestedToTeam(team);
+    } catch (e) {
+      console.error(e);
+    }
   });
 
   return null;
